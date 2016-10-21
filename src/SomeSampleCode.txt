@@ -1,0 +1,84 @@
+int InitGL(GLvoid)								// All Setup For OpenGL Goes Here
+{
+	if (!LoadGLTextures())							// Jump To Texture Loading Routine
+	{
+		return FALSE;							// If Texture Didn't Load Return FALSE
+	}
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);					// Clear The Background Color To Black
+	glClearDepth(1.0);							// Enables Clearing Of The Depth Buffer
+	glEnable(GL_DEPTH_TEST);						// Enable Depth Testing
+	glShadeModel(GL_SMOOTH);						// Enables Smooth Color Shading
+	glEnable(GL_TEXTURE_2D);						// Enable 2D Texture Mapping
+	return TRUE;								// Initialization Went OK
+}
+
+int DrawGLScene(GLvoid)								// Here's Where We Do All The Drawing
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);			// Clear The Screen And The Depth Buffer
+	glLoadIdentity();							// Reset The Modelview Matrix
+	glTranslatef(0.0f,0.0f,-2.0f);		
+	
+	glBindTexture(GL_TEXTURE_2D, texture[0]);				// Select Our Logo Texture
+	glBegin(GL_QUADS);							// Start Drawing A Textured Quad
+		glTexCoord2f(0.0f, -roll+0.0f); glVertex3f(-1.1f, -1.1f,  0.0f);	// Bottom Left
+		glTexCoord2f(3.0f, -roll+0.0f); glVertex3f( 1.1f, -1.1f,  0.0f);	// Bottom Right
+		glTexCoord2f(3.0f, -roll+3.0f); glVertex3f( 1.1f,  1.1f,  0.0f);	// Top Right
+		glTexCoord2f(0.0f, -roll+3.0f); glVertex3f(-1.1f,  1.1f,  0.0f);	// Top Left
+	glEnd();	
+
+	glEnable(GL_BLEND);							// Enable Blending
+	glDisable(GL_DEPTH_TEST);	
+
+	if (masking)								// Is Masking Enabled?
+	{
+		glBlendFunc(GL_DST_COLOR,GL_ZERO);				// Blend Screen Color With Zero (Black)
+	}
+
+	if (scene)								// Are We Drawing The Second Scene?
+	{
+		glTranslatef(0.0f,0.0f,-1.0f);					// Translate Into The Screen One Unit
+		glRotatef(roll*360,0.0f,0.0f,1.0f);	
+
+		if (masking)							// Is Masking On?
+		{
+			glBindTexture(GL_TEXTURE_2D, texture[3]);		// Select The Second Mask Texture
+			glBegin(GL_QUADS);					// Start Drawing A Textured Quad
+				glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.1f, -1.1f,  0.0f);	// Bottom Left
+				glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.1f, -1.1f,  0.0f);	// Bottom Right
+				glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.1f,  1.1f,  0.0f);	// Top Right
+				glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.1f,  1.1f,  0.0f);	// Top Left
+			glEnd();						// Done Drawing The Quad
+		}
+	
+		glBlendFunc(GL_ONE, GL_ONE);					// Copy Image 2 Color To The Screen
+		glBindTexture(GL_TEXTURE_2D, texture[4]);			// Select The Second Image Texture
+		glBegin(GL_QUADS);						// Start Drawing A Textured Quad
+			glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.1f, -1.1f,  0.0f);	// Bottom Left
+			glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.1f, -1.1f,  0.0f);	// Bottom Right
+			glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.1f,  1.1f,  0.0f);	// Top Right
+			glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.1f,  1.1f,  0.0f);	// Top Left
+		glEnd();							// Done Drawing The Quad
+	}
+
+	else									// Otherwise
+	{
+		if (masking)							// Is Masking On?
+		{
+			glBindTexture(GL_TEXTURE_2D, texture[1]);		// Select The First Mask Texture
+			glBegin(GL_QUADS);					// Start Drawing A Textured Quad
+				glTexCoord2f(roll+0.0f, 0.0f); glVertex3f(-1.1f, -1.1f,  0.0f);	// Bottom Left
+				glTexCoord2f(roll+4.0f, 0.0f); glVertex3f( 1.1f, -1.1f,  0.0f);	// Bottom Right
+				glTexCoord2f(roll+4.0f, 4.0f); glVertex3f( 1.1f,  1.1f,  0.0f);	// Top Right
+				glTexCoord2f(roll+0.0f, 4.0f); glVertex3f(-1.1f,  1.1f,  0.0f);	// Top Left
+			glEnd();						// Done Drawing The Quad
+		}
+		glBlendFunc(GL_ONE, GL_ONE);					// Copy Image 1 Color To The Screen
+		glBindTexture(GL_TEXTURE_2D, texture[2]);			// Select The First Image Texture
+		glBegin(GL_QUADS);						// Start Drawing A Textured Quad
+			glTexCoord2f(roll+0.0f, 0.0f); glVertex3f(-1.1f, -1.1f,  0.0f);	// Bottom Left
+			glTexCoord2f(roll+4.0f, 0.0f); glVertex3f( 1.1f, -1.1f,  0.0f);	// Bottom Right
+			glTexCoord2f(roll+4.0f, 4.0f); glVertex3f( 1.1f,  1.1f,  0.0f);	// Top Right
+			glTexCoord2f(roll+0.0f, 4.0f); glVertex3f(-1.1f,  1.1f,  0.0f);	// Top Left
+		glEnd();							// Done Drawing The Quad
+	}
